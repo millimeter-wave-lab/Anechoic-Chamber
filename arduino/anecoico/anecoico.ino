@@ -2,14 +2,18 @@
 #include <AccelStepper.h>
 
 // Define pin connections //Arduino UNO // Ardunio NANO
-const int DirPin = 7;   // 7          // 7
-const int StepPin = 4;  // 4          // 8
+const int DirPinZ = 7;
+const int StepPinZ = 4;
+
+const int DirPinX = 5;
+const int StepPinX = 2;
 
 // Define motor interface type
 #define motorInterfaceType 1
 
 // Creates an instance per stepper
-AccelStepper AntennaStepper(motorInterfaceType, StepPin, DirPin);
+AccelStepper AntennaStepperZ(motorInterfaceType, StepPinZ, DirPinZ);
+AccelStepper AntennaStepperX(motorInterfaceType, StepPinX, DirPinX);
 
 // Define stepper reduction
 const int StepperReduction = 60;
@@ -80,7 +84,8 @@ void loop() {
   recvWithStartEndMarkers();
   translateMsg();
   readCommand();
-  AntennaStepper.run();
+  AntennaStepperZ.run();
+  AntennaStepperX.run();
   
 }
 
@@ -90,7 +95,11 @@ void readCommand(){
     // Checking target motor
     int targetMotorNumber = atoi(recvTargetMotor);
     if (targetMotorNumber == 1){
-       targetMotor = &AntennaStepper;
+       targetMotor = &AntennaStepperZ;
+       targetReduction = StepperReduction;       
+    }
+    else if (targetMotorNumber == 2){
+       targetMotor = &AntennaStepperX;
        targetReduction = StepperReduction;       
     }
     else{
@@ -119,6 +128,7 @@ void readCommand(){
     }
     else if (strcmp(recvCmd,"setacc")==0){
      int targetAcceleration = atoi(recvCmdData);
+     
      setMotorAcceleration(*targetMotor, targetAcceleration);
      Serial.println("<"+String(targetMotorNumber)+"-ok:setacc-"+String(targetAcceleration)+">");
     }

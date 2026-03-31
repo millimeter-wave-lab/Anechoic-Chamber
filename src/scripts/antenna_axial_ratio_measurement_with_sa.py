@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     parser.add_argument('filename', help = 'name of the file')
     parser.add_argument('arduino_usb_port', help = 'arduino usb port for serial comm, tipically /dev/ttyUSB1')
-    parser.add_argument('-spl','--steps_per_loop', help ='steps per loop', default = 360)
+    parser.add_argument('-spl','--steps_per_loop', help ='steps per loop', default = 180)
     parser.add_argument('-rbw','--res_bw', type = float, default = 100, help ='resolution bandwidth in kHz. 100 kHz by default')
     parser.add_argument('-vbw','--video_bw', type = float, default = 100, help ='video bandwidth in kHz. 100 kHz by default')
     parser.add_argument('-swt','--sweep_time', type = float, default = 10, help ='sweep time in ms. 10 ms by default')
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # Defining degree step
     try:
         STEPS_PER_LOOP = int(args.steps_per_loop)
-        DEGREE_STEP = 360 / STEPS_PER_LOOP
+        DEGREE_STEP = 180 / STEPS_PER_LOOP
 
         print('Using degree step = ' + str(DEGREE_STEP))
         time.sleep(1)
@@ -129,7 +129,6 @@ if __name__ == '__main__':
         MIN_FREQ_default = sweep[0] * 1e6
 
     # Defining maximum freq span
-
     try:
         MAX_FREQ_default = args.maximum_freq_mhz * 1e6
     except:
@@ -154,7 +153,7 @@ if __name__ == '__main__':
     # gen_use = args.gen_measure
 
     name = args.filename
-    
+
     if (siglent_use):
         # Initializing spectrum analizer ethernet communication
         visaname = 'TCPIP0::10.17.90.141::inst0::INSTR'
@@ -182,9 +181,10 @@ if __name__ == '__main__':
     else:
         print("Could not open arduino radar port, FATAL ERROR")
 
-    motor = stepper_motor.stepper_motor(id = 1,speed = 0, max_speed = 400, acceleration = 100)
+    # Maximum speed must not exceed 100 for motor at X-axis (id = 2)
+    motor = stepper_motor.stepper_motor(id = 2,speed = 0, max_speed = 100, acceleration = 100)
 
-    motor.set_motor_max_speed(400)
+    motor.set_motor_max_speed(100)
     motor.set_motor_speed(0)
     motor.set_motor_acceleration(100)
     time.sleep(1)
@@ -215,7 +215,7 @@ if __name__ == '__main__':
                 print("Unknown command, try again. For ex: move 90")
 
     # Pointing and measuring the corresponding angles
-    print("YOU HAVE 180 SECONDS TO LEAVE THE ROOM!")
+    print("YOU HAVE 1 SECONDS TO LEAVE THE ROOM!")
     time.sleep(1)
     start_time = time.time()
 
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     angles = STEPS_PER_LOOP
     spectrum = np.zeros((STEPS_PER_LOOP, pts))
 
-    target_angle = -180
+    target_angle = 0
     for i in range(angles):
 
         meas = point_and_measure(target_angle, measure_wait_time, siglent_use)
